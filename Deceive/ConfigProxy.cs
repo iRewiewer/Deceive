@@ -36,8 +36,8 @@ internal class ConfigProxy
 
         ConfigPort = port;
 
-        // Start a web server that sends everything to ProxyAndRewriteResponse
-        var server = new WebServer(o => o
+		// Start a web server that sends everything to ProxyAndRewriteResponse
+		WebServer server = new WebServer(o => o
                 .WithUrlPrefix("http://127.0.0.1:" + port)
                 .WithMode(HttpListenerMode.EmbedIO))
             .WithModule(new ActionModule("/", HttpVerbs.Get, ProxyAndRewriteResponseAsync));
@@ -78,10 +78,10 @@ internal class ConfigProxy
      */
     private async Task ProxyAndRewriteResponseAsync(IHttpContext ctx)
     {
-        var url = ConfigUrl + ctx.Request.RawUrl;
+        string? url = ConfigUrl + ctx.Request.RawUrl;
         Trace.WriteLine("Received client proxy request to URL: " + url);
 
-        using var message = new HttpRequestMessage(HttpMethod.Get, url);
+        using HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, url);
         // Cloudflare bitches at us without a user agent.
         message.Headers.TryAddWithoutValidation("User-Agent", ctx.Request.Headers["user-agent"]);
 
@@ -92,10 +92,10 @@ internal class ConfigProxy
         if (ctx.Request.Headers["authorization"] is not null)
             message.Headers.TryAddWithoutValidation("Authorization", ctx.Request.Headers["authorization"]);
 
-        var result = await Client.SendAsync(message);
+		HttpResponseMessage result = await Client.SendAsync(message);
         Trace.WriteLine("Received response from clientconfig service with status code: " + result.StatusCode);
-        var content = await result.Content.ReadAsStringAsync();
-        var modifiedContent = content;
+        string? content = await result.Content.ReadAsStringAsync();
+        string? modifiedContent = content;
         Trace.WriteLine("ORIGINAL CLIENTCONFIG: " + content);
 
         // sometimes riot yields an internal error with content that is definitely
@@ -106,10 +106,10 @@ internal class ConfigProxy
 
         try
         {
-            var configObject = JsonSerializer.Deserialize<JsonNode>(content);
+			JsonNode? configObject = JsonSerializer.Deserialize<JsonNode>(content);
 
             string? riotChatHost = null;
-            var riotChatPort = 0;
+			int riotChatPort = 0;
 
             // Set fallback host to localhost.
             if (configObject?["chat.host"] is not null)
@@ -129,21 +129,21 @@ internal class ConfigProxy
             // Set chat.affinities (a dictionary) to all localhost.
             if (configObject?["chat.affinities"] is not null)
             {
-                var affinities = configObject["chat.affinities"];
+				JsonNode? affinities = configObject["chat.affinities"];
                 if (configObject["chat.affinity.enabled"]?.GetValue<bool>() ?? false)
                 {
-                    var pasRequest = new HttpRequestMessage(HttpMethod.Get, GeoPasUrl);
+					HttpRequestMessage pasRequest = new HttpRequestMessage(HttpMethod.Get, GeoPasUrl);
                     pasRequest.Headers.TryAddWithoutValidation("Authorization", ctx.Request.Headers["authorization"]);
 
                     try
                     {
-                        var pasJwt = await (await Client.SendAsync(pasRequest)).Content.ReadAsStringAsync();
+                        string? pasJwt = await (await Client.SendAsync(pasRequest)).Content.ReadAsStringAsync();
                         Trace.WriteLine("PAS JWT:" + pasJwt);
-                        var pasJwtContent = pasJwt.Split('.')[1];
-                        var validBase64 = pasJwtContent.PadRight((pasJwtContent.Length / 4 * 4) + (pasJwtContent.Length % 4 == 0 ? 0 : 4), '=');
-                        var pasJwtString = Encoding.UTF8.GetString(Convert.FromBase64String(validBase64));
-                        var pasJwtJson = JsonSerializer.Deserialize<JsonNode>(pasJwtString);
-                        var affinity = pasJwtJson?["affinity"]?.GetValue<string>();
+                        string? pasJwtContent = pasJwt.Split('.')[1];
+                        string? validBase64 = pasJwtContent.PadRight((pasJwtContent.Length / 4 * 4) + (pasJwtContent.Length % 4 == 0 ? 0 : 4), '=');
+                        string? pasJwtString = Encoding.UTF8.GetString(Convert.FromBase64String(validBase64));
+                        JsonNode? pasJwtJson = JsonSerializer.Deserialize<JsonNode>(pasJwtString);
+                        string? affinity = pasJwtJson?["affinity"]?.GetValue<string>();
 
                         // replace fallback host with host by player affinity
                         if (affinity is not null)
@@ -193,7 +193,7 @@ internal class ConfigProxy
         // Using the builtin EmbedIO methods for sending the response adds some garbage in the front of it.
         // This seems to do the trick.
 RESPOND:
-        var responseBytes = Encoding.UTF8.GetBytes(modifiedContent);
+		byte[] responseBytes = Encoding.UTF8.GetBytes(modifiedContent);
 
         ctx.Response.StatusCode = (int)result.StatusCode;
         ctx.Response.SendChunked = false;

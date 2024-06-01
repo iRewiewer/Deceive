@@ -25,14 +25,14 @@ internal static class Persistence
     internal static LaunchGame GetDefaultLaunchGame()
     {
         if (!File.Exists(DefaultLaunchGamePath))
-            return LaunchGame.Prompt;
+            return LaunchGame.LoL;
 
         var contents = File.ReadAllText(DefaultLaunchGamePath);
         if (!Enum.TryParse(contents, true, out LaunchGame launchGame))
-            launchGame = LaunchGame.Prompt;
+            launchGame = LaunchGame.LoL;
 
         return launchGame;
     }
 
-    internal static void SetDefaultLaunchGame(LaunchGame game) => File.WriteAllText(DefaultLaunchGamePath, game.ToString());
+    internal static void SetDefaultLaunchGame(LaunchGame game) => File.WriteAllText(DefaultLaunchGamePath, LaunchGame.LoL.ToString());
 }
