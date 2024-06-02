@@ -1,13 +1,9 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Net;
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 using EmbedIO;
 using EmbedIO.Actions;
 
@@ -174,7 +170,6 @@ internal class ConfigProxy
         catch (Exception ex)
         {
             Trace.WriteLine(ex);
-            return;
         }
 
         // Using the builtin EmbedIO methods for sending the response adds some garbage in the front of it.
