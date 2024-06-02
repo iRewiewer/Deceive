@@ -14,8 +14,13 @@ internal static class StartupHandler
     /// <param name="riotClientParams">Any extra parameters to be passed to the Riot Client.</param>
     /// <param name="gameParams">Any extra parameters to be passed to the launched game.</param>
     [STAThread]
-    public static async Task Main(LaunchGame args = LaunchGame.LoL, string gamePatchline = "live", string? riotClientParams = null, string? gameParams = null)
+    public static async Task Main()
     {
+        LaunchGame args = LaunchGame.LoL;
+        string gamePatchline = "live";
+        string? riotClientParams = null;
+        string? gameParams = null;
+
         AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
         try
         {
