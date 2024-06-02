@@ -95,8 +95,6 @@ internal class MainController
     {
         await UpdateStatusAsync(Status = "offline");
         Enabled = true;
-		Task.Delay(5000);
-		UpdateTrayAsync();
     }
 
     private async Task SendIntroductionTextAsync()

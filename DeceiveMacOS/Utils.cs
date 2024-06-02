@@ -49,11 +49,8 @@ internal static class Utils
     // and returns the path of the client if it does. Else, returns null.
     public static string? GetRiotClientPath()
     {
-		// Find the RiotClientInstalls file.
-		string installPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "Riot Games/RiotClientInstalls.json");
-        if (!File.Exists(installPath))
-            return null;
+		// Get the RiotClientInstalls file.
+		string installPath = "/Users/Shared/Riot Games/RiotClientInstalls.json";
 
         try
         {

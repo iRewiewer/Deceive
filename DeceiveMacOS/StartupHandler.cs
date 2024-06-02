@@ -64,6 +64,7 @@ internal static class StartupHandler
 		// Step 2: Find the Riot Client.
 		string? riotClientPath = Utils.GetRiotClientPath();
 
+        Trace.WriteLine($"riotClientPath is {riotClientPath}");
         // If the riot client doesn't exist, the user is either severely outdated or has a bugged install.
         if (riotClientPath is null)
         {
